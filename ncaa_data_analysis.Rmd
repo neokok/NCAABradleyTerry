@@ -1,0 +1,31 @@
+---
+title: "ncaa_data_analysis"
+output: github_document
+date: "2024-12-13"
+---
+
+```{r}
+library("dplyr")
+library("tidyr")
+library("data.table")
+```
+
+
+```{r}
+ncaa_data = read.csv("C:/Users/lub11/OneDrive/Documents/BIOS 625 HW/ncaa_data.csv")
+ncaa_tourney_games = read.csv("C:/Users/lub11/OneDrive/Documents/BIOS 625 HW/ncaa_tourney_games.csv")
+```
+
+```{r}
+str(ncaa_data) #look at types 
+str(ncaa_tourney_data)
+colSums(is.na(ncaa_tourney_games)) #check for NA values
+sum(duplicated(ncaa_tourney_games)) #check for duplicates
+
+""
+```
+ncaa_data has some missing data for certain columns, ncaa_tourney_games has no missing data
+
+Some categorical variables we might want to convert to factors or continuous variables?
+Data is in either int or chr type
+
