@@ -1,5 +1,5 @@
 library(tidyverse)
-
+start_time <- Sys.time()
 
 ncaa_data = read_csv("ncaa_data.csv") %>% filter(season > 2000, current_division == "D1")
 ncaa_teams = read_csv("ncaa_teams.csv")
@@ -43,7 +43,7 @@ process_model = function(ncaa, teams, seeds, season){
       result = ifelse(location == "home_team", result, 1 - result)
     )
   
-  print("Fitting model")
+  print(paste0("Fitting model ", season))
   # Step 2: Fit the logistic regression model
   bt_model <- glm(
     result ~ home + as.factor(team) + as.factor(home_conf) + as.factor(away_conf) - 1,
@@ -59,6 +59,7 @@ process_model = function(ncaa, teams, seeds, season){
     Team = names(ranked_teams),
     Strength = ranked_teams
   )
+  
   top_64 = ranked_teams[1:64,] %>% mutate(season = season)
   top_64$school_name = rownames(top_64)
   top_64$bt_seed <- rep(1:16, each = 4)
@@ -67,7 +68,22 @@ process_model = function(ncaa, teams, seeds, season){
   return(ranking)
 }
 
+combined_results = process_model(ncaa_data, ncaa_teams, seeds, 2000)
+for(season in c(2001:2016)){
+  combined_results = rbind(combined_results, process_model(ncaa_data, ncaa_teams, seeds, season))
+
+}
 
 
 
-process_model(ncaa_data, ncaa_teams, seeds, 2003)
+combined_results %>% na.omit() %>% group_by(season) %>% summarise(num = n(), na = 64 - num, same = sum(bt_seed == seed), diff = sum((bt_seed - as.integer(seed)), na.rm = T))
+
+
+write_csv(combined_results, "ranking_comparison.csv")
+
+
+
+
+end_time <- Sys.time()
+total_time <- end_time - start_time
+total_time
