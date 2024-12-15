@@ -3,44 +3,71 @@ library(tidyverse)
 
 ncaa_data = read_csv("ncaa_data.csv") %>% filter(season > 2000, current_division == "D1")
 ncaa_teams = read_csv("ncaa_teams.csv")
+seeds = read_csv("team_seeds_2000_2016.csv") %>% select(season, school_name, seed)
 
-ncaa_data = ncaa_data %>% select(season, team_code, points_game, win, opp_code, opp_points_game)
-ncaa_teams = ncaa_teams %>% select(school_ncaa, team_code = code_ncaa, conf_name) 
+process_model = function(ncaa, teams, seeds, season){
+  ncaa = ncaa %>% select(season, team_code, points_game, win, opp_code, opp_points_game) %>% filter(season == season)
+  teams = teams %>% select(school_ncaa, team_code = code_ncaa, conf_name) 
+  
+  data = left_join(ncaa, select(teams, home_team = school_ncaa, team_code, home_conf = conf_name), by = c("team_code")) 
+  data = left_join(data, select(teams, away_team = school_ncaa, opp_code = team_code, away_conf = conf_name), by = c("opp_code"))
+  
+  #Some teams dropped from d1 to d2 or lower so dropped them
+  data = data %>% na.omit()
+  
+  data = data %>% mutate(point_diff = points_game - opp_points_game, win = ifelse(win, 1, 0)) %>%
+    select(season, home_team, away_team, result = win, home_conf, away_conf, point_diff)
+  
+ 
+  home_counts <- table(data$home_team)
+  away_counts <- table(data$away_team)
+  
+  # Combine counts for home and away games
+  total_counts <- home_counts + away_counts
+  
+  # Step 2: Filter teams with 10 or more games
+  valid_teams <- names(total_counts[total_counts > 10])
+  
+  # Step 3: Filter the dataset to include only valid teams
+  filtered_data <- subset(data, home_team %in% valid_teams & away_team %in% valid_teams)
+  
+  # Step 1: Reshape the data for both teams
+  data_long <- filtered_data %>%
+    pivot_longer(
+      cols = c(home_team, away_team), 
+      names_to = "location", 
+      values_to = "team"
+    ) %>%
+    mutate(
+      home = ifelse(location == "home_team", 1, 0),
+      result = ifelse(location == "home_team", result, 1 - result)
+    )
+  
+  print("Fitting model")
+  # Step 2: Fit the logistic regression model
+  bt_model <- glm(
+    result ~ home + as.factor(team) + as.factor(home_conf) + as.factor(away_conf) - 1,
+    family = binomial(link = "logit"),
+    data = data_long
+  )
+  
+  team_coefficients <- coef(bt_model)[grep("^as.factor\\(team\\)", names(coef(bt_model)))]
+  names(team_coefficients) <- gsub("as.factor\\(team\\)", "", names(team_coefficients))
+  ranked_teams <- sort(team_coefficients, decreasing = TRUE)
+  
+  ranked_teams <- data.frame(
+    Team = names(ranked_teams),
+    Strength = ranked_teams
+  )
+  top_64 = ranked_teams[1:64,] %>% mutate(season = season)
+  top_64$school_name = rownames(top_64)
+  top_64$bt_seed <- rep(1:16, each = 4)
+  ranking = left_join(top_64, seeds, by = c("school_name", "season"))
+  
+  return(ranking)
+}
 
 
 
-data = left_join(ncaa_data, select(ncaa_teams, home_team = school_ncaa, team_code, home_conf = conf_name), by = c("team_code")) 
-data = left_join(data, select(ncaa_teams, away_team = school_ncaa, opp_code = team_code, away_conf = conf_name), by = c("opp_code"))
 
-#Some teams dropped from d1 to d2 or lower so dropped them
-data = data %>% na.omit()
-
-data = data %>% mutate(point_diff = points_game - opp_points_game, win = ifelse(win, 1, 0)) %>%
-  select(season, home_team, away_team, result = win, home_conf, away_conf, point_diff)
-
-
-
-library(BradleyTerry2)
-data = data %>% filter(season == 2001)
-# Example dataset
-bt_model <- BTm(
-  cbind(result, 1 - result),  # Outcome
-  player1 = as.factor(home_team), 
-  player2 = as.factor(away_team), 
-  formula = ~ as.factor(home_conf) + as.factor(away_conf) + point_diff,
-  data = data
-)
-
-summary(bt_model)
-
-
-
-
-bt_model <- BTm(
-  cbind(result, 1 - result),
-  player1 = as.factor(home_team),
-  player2 = as.factor(away_team),
-  formula = ~ point_diff,
-  data = data
-)
-
+process_model(ncaa_data, ncaa_teams, seeds, 2003)
