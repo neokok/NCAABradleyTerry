@@ -142,13 +142,50 @@ print(total_time)
 
 Most accurate year:
 ```{r}
+best_year = c()
+count_max = 0
 
+for(i in 2000:2016){
+  
+  df_year_i = combined_results%>%filter(season == i)
+  num_correctly_identified = nrow(df_year_i) - sum(is.na(df_year_i$seed))
+  if(num_correctly_identified > count_max){
+    count_max = num_correctly_identified
+    best_year = c(i)
+  }
+  if(num_correctly_identified == count_max){
+     best_year = appeand(best_year, i) 
+    
+  }
+  
+}
+
+print(best_year)
 
 ```
 
 Least accurate year:
 ```{r}
 
+worst_year = c()
+count_max = 99999
+
+for(i in 2000:2016){
+  
+  df_year_i = combined_results%>%filter(season == i)
+  num_correctly_identified = nrow(df_year_i) - sum(is.na(df_year_i$seed))
+  if(num_correctly_identified < count_max){
+    count_max = num_correctly_identified
+    worst_year = c(i)
+  }
+  if(num_correctly_identified == count_max){
+     worst_year = appeand(worst_year, i) 
+    
+  }
+  
+}
+
+print(worst_year)
 
 
 ```
