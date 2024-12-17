@@ -190,31 +190,91 @@ print(worst_year)
 
 ```
 
-
-Deviance:
+Deviance reduction graph by year:
 
 ```{r}
+deviance$deviance_explained = (deviance$null_deviance - deviance$model_deviance)/deviance$null_deviance *100
 
+ggplot(deviance, aes(x = factor(season), y = deviance_explained)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black")+ 
+  geom_text(aes(label = round(deviance_explained, 2)), vjust = -0.5, color = "black", size = 3) + 
+  labs(title = "Deviance Explained by Year", x = "Season", y = "Deviance Explained (%)"
+  )+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 
 ```
 
-
-Residual plots:
-
+Predictions by year
 
 ```{r}
 
+data_long <- differences %>%
+  mutate(
+    correct = num, misseeds = correct - same, incorrect = na  
+  ) %>%
+  select(season, same, misseeds, incorrect) %>%
+  pivot_longer(cols = c(same, misseeds, incorrect), 
+               names_to = "PredictionType", 
+               values_to = "Count") %>%
+  mutate(PredictionType = factor(PredictionType, levels = c("same", "misseeds", "incorrect")))
+
+
+total_predictions <- data_long %>%
+  group_by(season) %>%
+  summarise(Total = sum(Count))
+
+
+ggplot(data_long, aes(x = factor(season), y = Count)) +
+  geom_bar(stat = "identity", position = "stack", aes(fill = PredictionType)) +
+  labs(
+    title = "Prediction Accuracy for College Basketball Tournament (2000-2016)",
+    x = "Season",
+    y = "Number of Predictions",
+    fill = "Prediction Type"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("lightgreen", "orange", "red")) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  
+  theme(plot.title = element_text(hjust = 0.5)) +  
+  
+  geom_text(data = total_predictions, 
+            aes(x = factor(season), y = Total + 2, label = "64"), 
+            color = "black", size = 4, vjust = 0)  
+
+  
+```
+
+Errors in yearly predictions:
+```{r}
+
+
+differences <- differences %>%
+  mutate(diff_percent = (diff / num) * 100)  # Calculate diff as a percentage of num
+
+
+ggplot(differences, aes(x = factor(season))) +
+  geom_bar(aes(y = diff_percent, fill = num), stat = "identity", width = 0.7) +
+  labs(
+    title = "Seeding Difference as Percentage of Correct Predictions (2000-2016)",
+    x = "Season",
+    y = "Seeding Difference (%)",
+    fill = "Correct Predictions (num)"
+  ) +
+  scale_fill_gradient(low = "yellow", high = "green") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 
 ```
 
-Significance of other predictors:
-
+Point differential discussion:
 
 ```{r}
 
-
+print(point_differential)
 
 ```
 
