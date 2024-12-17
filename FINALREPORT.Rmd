@@ -201,7 +201,11 @@ print(worst_year)
 
 ```
 
-After running our methods, we produce some other data sets that will help us interpret the results. Before getting into what our predictions actually were, we want to produce a metric that expands on how well our model actually fits the data. A common way to interpret this in the context of a Bradley-Terry model (a specific type of generalized linear model as explained above) is to measure the deviance. In a general context, the deviance compares the likelihood of our fitted model to another complete model. This complete model essentially has no residual errors, which is a complete over fit of a model. In our case our likelihoods were calculated on a binomial distribution, which was a key assumption for the data. 
+After running our methods, we produce some other data sets that will help us interpret the results. 
+Before getting into what our predictions actually were, we want to produce a metric that expands on how well our model actually fits the data. 
+A common way to interpret this in the context of a Bradley-Terry model (a specific type of generalized linear model as explained above) is to measure the deviance. In a general context, the deviance compares the likelihood of our fitted model to another complete model. 
+This complete model essentially has no residual errors, which is a complete over fit of a model. 
+In our case our likelihoods were calculated on a binomial distribution, which was a key assumption for the data. 
 
 In purely mathematical terms,
 
@@ -209,7 +213,13 @@ $deviance = -2 \cdot [ln(Likelihood(model_{fitted})) - ln(Likelihood(model_{comp
 
 For information https://en.wikipedia.org/wiki/Deviance_(statistics). 
 
-A low deviance informs us that the model has fit the data well. However, a raw deviance statistic doesn't indicate too much without context, as we have to consider things such as sample size. Our deviance were indeed large, but we are dealing with big data. Instead of looking at a standardized form of deviance (taking into account sample size), we want to modify to get another modification to this metric called `Deviance reduction`. In order to calculate this, we need two different types of deviance for each year (2000-2016): null deviance and residual deviance. The null deviance calculates the fit of the model without any predictors. The residual deviance includes our desired predictors (home, point differential, school conference). Thus, the difference between the two gives us the reduction. In order to get the `Deviance explained` by the model (in terms of a percentage), we divide the reduction by the null deviance. Mathematically, 
+A low deviance informs us that the model has fit the data well. 
+However, a raw deviance statistic doesn't indicate too much without context, as we have to consider things such as sample size. 
+Our deviance were indeed large, but we are dealing with big data. Instead of looking at a standardized form of deviance (taking into account sample size), we want to modify to get another modification to this metric called `Deviance reduction`. 
+In order to calculate this, we need two different types of deviance for each year (2000-2016): null deviance and residual deviance.
+The null deviance calculates the fit of the model without any predictors. The residual deviance includes our desired predictors (home, point differential, school conference). 
+Thus, the difference between the two gives us the reduction.
+In order to get the `Deviance explained` by the model (in terms of a percentage), we divide the reduction by the null deviance. Mathematically, 
 
 deviance explained = [(null deviance) - (residual deviance)]/ (null deviance ) * 100 = (deviance reduction)/ (null deviance ) * 100.
 
