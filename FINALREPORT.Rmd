@@ -139,6 +139,17 @@ print(total_time)
 
 **RESULTS**
 
+Read in data:
+```{r}
+
+x = read_csv("ranking_comparison.csv")
+differences = read_csv("differences.csv")
+point_differential = read_csv("points_diff_p_values.csv")
+deviance = read_csv("deviances.csv")
+
+
+```
+
 
 Most accurate year:
 ```{r}
