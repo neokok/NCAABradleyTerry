@@ -1,4 +1,4 @@
-FinalSeed <- 'C:/Users/eorra/OneDrive/Documents/BS625 Project/ncaa_tourney_games.csv'
+ FinalSeed <- 'C:/Users/eorra/OneDrive/Documents/BS625 Project/ncaa_tourney_games.csv'
 dataFS <- read.csv(FinalSeed)
 View(dataFS)
 library(dplyr)
