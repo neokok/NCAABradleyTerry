@@ -1,0 +1,48 @@
+---
+title: "Latent Team Strengths using the Bradley-Terry Model on NCAA Men’s Basketball Regular Season and Tournament Rankings"
+author: "Gabriel Alwan, Neo Kok, Kevin Lu, Liz Orraca"
+output: pdf_document
+date: "2024-12-17"
+---
+
+# Abstract
+
+
+
+---
+
+# Introduction
+
+
+
+---
+
+# Methods
+
+
+---
+
+#Results
+
+
+---
+
+#Discussion
+
+
+
+
+---
+
+
+#Conclusion
+
+
+---
+
+#Referenes
+
+
+---
+
+
